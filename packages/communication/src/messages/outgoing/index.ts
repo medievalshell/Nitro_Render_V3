@@ -36,6 +36,7 @@ export * from './inventory/unseen';
 export * from './landingview';
 export * from './landingview/votes';
 export * from './marketplace';
+export * from './mentions';
 export * from './moderation';
 export * from './mysterybox';
 export * from './navigator';

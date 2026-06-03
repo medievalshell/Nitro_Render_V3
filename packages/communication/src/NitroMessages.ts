@@ -12,6 +12,7 @@ import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
 import { SoundboardPlayEvent, SoundboardSettingsEvent, SoundboardPlayComposer, SoundboardSetEnabledComposer } from './messages';
+import { DeleteMentionComposer, MarkMentionsReadComposer, MentionReceivedEvent, MentionsListEvent, RequestMentionsComposer } from './messages';
 export class NitroMessages implements IMessageConfiguration
 {
     private _events: Map<number, Function>;
@@ -299,6 +300,10 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.MARKETPLACE_ITEM_POSTED, MarketplaceMakeOfferResult);
         this._events.set(IncomingHeader.MARKETPLACE_ITEMS_SEARCHED, MarketPlaceOffersEvent);
         this._events.set(IncomingHeader.MARKETPLACE_OWN_ITEMS, MarketplaceOwnOffersEvent);
+
+        // MENTIONS
+        this._events.set(IncomingHeader.MENTION_RECEIVED, MentionReceivedEvent);
+        this._events.set(IncomingHeader.MENTIONS_LIST, MentionsListEvent);
 
         // MODERATION
         this._events.set(IncomingHeader.USER_BANNED, UserBannedMessageEvent);
@@ -1153,6 +1158,11 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.MARKETPLACE_BUY_TOKENS, BuyMarketplaceTokensMessageComposer);
         this._composers.set(OutgoingHeader.REQUEST_SELL_ITEM, GetMarketplaceCanMakeOfferComposer);
         this._composers.set(OutgoingHeader.REQUEST_MARKETPLACE_ITEM_STATS, GetMarketplaceItemStatsComposer);
+
+        // MENTIONS
+        this._composers.set(OutgoingHeader.REQUEST_MENTIONS, RequestMentionsComposer);
+        this._composers.set(OutgoingHeader.MARK_MENTIONS_READ, MarkMentionsReadComposer);
+        this._composers.set(OutgoingHeader.DELETE_MENTION, DeleteMentionComposer);
 
         // BOTS
         this._composers.set(OutgoingHeader.USER_BOTS, GetBotInventoryComposer);

@@ -3,6 +3,10 @@ export class IncomingHeader
     // These packets do not belong to this revision, so these are custom packet ids
     public static AREA_HIDE = 6001;
 
+    // MENTIONS
+    public static MENTION_RECEIVED = 4801;
+    public static MENTIONS_LIST = 4802;
+
     // Original packets
     public static ACHIEVEMENT_LIST = 305;
     public static AUTHENTICATED = 2491;

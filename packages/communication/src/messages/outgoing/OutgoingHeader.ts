@@ -3,6 +3,11 @@ export class OutgoingHeader
     public static CLICK_FURNI = 6002;
     public static CLICK_USER = 10020;
 
+    // MENTIONS
+    public static REQUEST_MENTIONS = 4803;
+    public static MARK_MENTIONS_READ = 4804;
+    public static DELETE_MENTION = 4805;
+
     public static ACHIEVEMENT_LIST = 219;
     public static AUTHENTICATION = -1;
     public static BOT_CONFIGURATION = 1986;
