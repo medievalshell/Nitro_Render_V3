@@ -23,7 +23,7 @@ describe('MentionReceivedParser', () =>
     it('parses a single mention without read flag', () =>
     {
         const w = new BinaryWriter();
-        w.writeInt(7); w.writeInt(42); w.writeString('Bob'); w.writeInt(99);
+        w.writeInt(7); w.writeInt(42); w.writeString('Bob'); w.writeString('hd-180-1.ch-255-66'); w.writeInt(99);
         w.writeString('My Room'); w.writeString('ciao @me'); w.writeInt(0); w.writeInt(1717000000);
         const parser = new MentionReceivedParser();
         parser.flush();
@@ -32,6 +32,7 @@ describe('MentionReceivedParser', () =>
         expect(m.mentionId).toBe(7);
         expect(m.senderId).toBe(42);
         expect(m.senderUsername).toBe('Bob');
+        expect(m.senderFigure).toBe('hd-180-1.ch-255-66');
         expect(m.roomId).toBe(99);
         expect(m.roomName).toBe('My Room');
         expect(m.message).toBe('ciao @me');
@@ -46,7 +47,7 @@ describe('MentionsListParser', () =>
     it('parses a count-prefixed list with read flags', () =>
     {
         const w = new BinaryWriter();
-        w.writeInt(1); w.writeInt(3); w.writeInt(42); w.writeString('Bob'); w.writeInt(99);
+        w.writeInt(1); w.writeInt(3); w.writeInt(42); w.writeString('Bob'); w.writeString('hd-180-1'); w.writeInt(99);
         w.writeString('My Room'); w.writeString('@all festa'); w.writeInt(1); w.writeInt(1717000000); w.writeByte(1);
         const parser = new MentionsListParser();
         parser.flush();
