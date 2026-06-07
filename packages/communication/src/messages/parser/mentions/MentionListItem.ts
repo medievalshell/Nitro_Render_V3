@@ -18,6 +18,9 @@ export class MentionListItem
         this._mentionId = wrapper.readInt();
         this._senderId = wrapper.readInt();
         this._senderUsername = wrapper.readString();
+        // Wire order: sender_figure sits between username and roomId. The
+        // server composer writes it unconditionally; an empty string is
+        // produced for legacy rows where the column wasn't loaded.
         this._senderFigure = wrapper.readString();
         this._roomId = wrapper.readInt();
         this._roomName = wrapper.readString();

@@ -493,9 +493,13 @@ export class IncomingHeader
 	public static FURNI_EDITOR_DETAIL_RESULT = 10041;
 	public static FURNI_EDITOR_INTERACTIONS_RESULT = 10043;
 	public static FURNI_EDITOR_RESULT = 10044;
+	public static FURNITURE_DATA_RELOAD = 10047;
+	public static FURNI_EDITOR_IMPORT_TEXT_RESULT = 10049;
 
 	// Catalog Admin
     public static CATALOG_ADMIN_RESULT = 10059;
+    public static CATALOG_ADMIN_OFFER_DETAILS = 10062;
+    public static CATALOG_ADMIN_PAGE_DETAILS = 10063;
 
     // Custom Prefixes
     public static USER_PREFIXES = 7001;
