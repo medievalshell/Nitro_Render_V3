@@ -6,6 +6,7 @@ export class ConfigurationManager implements IConfigurationManager
     private _definitions: Map<string, unknown> = new Map();
     private _config: any = {};
     private _missingKeys: string[] = [];
+    private _initialized: boolean = false;
 
     constructor()
     {
@@ -14,7 +15,18 @@ export class ConfigurationManager implements IConfigurationManager
 
     public async init(): Promise<void>
     {
+        // init() is invoked more than once during boot: bootstrap.ts loads the config
+        // before React mounts, then App's warm-up calls it again. reloadConfiguration()
+        // begins by clearing the store, which opens a window where every synchronous
+        // getValue() falls through to a one-shot "Missing configuration key" warning
+        // (mentions_ui.*, external.plugins, loading.task.*, …) before the urls re-land.
+        // Make init() idempotent so the store is built exactly once. A genuine live
+        // reload still calls reloadConfiguration() directly and is unaffected.
+        if(this._initialized) return;
+
         await this.reloadConfiguration();
+
+        this._initialized = true;
     }
 
     public async reloadConfiguration(): Promise<void>
@@ -35,33 +47,24 @@ export class ConfigurationManager implements IConfigurationManager
 
             for(const url of configurationUrls)
             {
-                if(!url || !url.length) return;
+                if(!url || !url.length) continue;
 
-                let response: Response;
-
+                // Per-URL resilience: un singolo config rotto NON deve abortire il boot
+                // ne cancellare le chiavi degli altri config gia caricati. Logga e prosegui.
                 try
                 {
-                    response = await fetch(url);
+                    const response = await fetch(url);
+
+                    if(response.status !== 200) throw new Error(`server returned HTTP ${ response.status }`);
+
+                    const json = await parseConfigJsonFromResponse(response, url);
+
+                    this.parseConfiguration(json);
                 }
-                catch(fetchError)
+                catch(urlError)
                 {
-                    throw new Error(`Failed to fetch config "${ url }" — check that the file exists and the server is reachable (${ fetchError.message })`);
+                    NitroLogger.error(`[ConfigurationManager] Failed to load config "${ url }": ${ urlError?.message || urlError } — continuing with remaining config urls`);
                 }
-
-                if(response.status !== 200) throw new Error(`Failed to load config "${ url }" — server returned HTTP ${ response.status }`);
-
-                let json: any;
-
-                try
-                {
-                    json = await parseConfigJsonFromResponse(response, url);
-                }
-                catch(parseError)
-                {
-                    throw new Error(`Invalid config "${ url }" — JSON/JSON5 parse failed. JSON5 allows comments, trailing commas and unquoted keys (${ parseError.message })`);
-                }
-
-                this.parseConfiguration(json);
             }
         }
 
@@ -162,6 +165,11 @@ export class ConfigurationManager implements IConfigurationManager
 
     public setValue<T>(key: string, value: T): void
     {
+        // _definitions (flat key -> value) is the source of truth for getValue(). Set it
+        // FIRST so a key is always retrievable even if the nested _config mirror below
+        // cannot represent it (see the collision note).
+        this._definitions.set(key, value);
+
         const parts = key.split('.');
 
         let last = this._config;
@@ -172,7 +180,13 @@ export class ConfigurationManager implements IConfigurationManager
 
             if(i !== (parts.length - 1))
             {
-                if(!last[part]) last[part] = {};
+                // Two config keys can collide on a prefix: e.g. "theme.default" (a string)
+                // and "theme.default.pieces" (an array). Writing a child property onto a
+                // scalar node throws a TypeError in strict mode (ES modules), which
+                // parseConfiguration's try/catch swallows — silently dropping EVERY key
+                // parsed after the collision (here: mentions_ui.*, loading.*, external.plugins).
+                // Coerce any non-object node to an object so nesting always succeeds.
+                if(!last[part] || typeof last[part] !== 'object') last[part] = {};
 
                 last = last[part];
 
@@ -181,8 +195,6 @@ export class ConfigurationManager implements IConfigurationManager
 
             last[part] = value;
         }
-
-        this._definitions.set(key, value);
     }
 
     public getDefaultConfig(): { [index: string]: any }
