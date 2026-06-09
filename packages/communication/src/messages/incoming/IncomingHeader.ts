@@ -117,6 +117,8 @@ export class IncomingHeader
     public static MESSENGER_REQUESTS = 280;
     public static MESSENGER_SEARCH = 973;
     public static MESSENGER_UPDATE = 2800;
+    public static CONSOLE_READ_RECEIPT = 4086;
+    public static FRIEND_TYPING = 4088;
     public static MODERATION_REPORT_DISABLED = 1651;
     public static MODERATION_TOOL = 2696;
     public static MODERATION_USER_INFO = 2866;
